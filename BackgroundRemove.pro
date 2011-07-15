@@ -11,8 +11,15 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    clickableqlabel.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    clickableqlabel.h
 
 FORMS    += mainwindow.ui
+
+OTHER_FILES +=
+
+RESOURCES += \
+    images.qrc

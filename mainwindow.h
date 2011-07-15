@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
+#include <QPushButton>
+#include <clickableqlabel.h>
 
 namespace Ui {
     class MainWindow;
@@ -17,6 +20,10 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    ClickableQLabel *imageLabel;
+
+private slots:
+    void open();
 };
 
 #endif // MAINWINDOW_H
