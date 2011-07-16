@@ -10,10 +10,13 @@ public:
     explicit ClickableQLabel(QWidget *parent = 0);
 protected:
     void mousePressEvent(QMouseEvent *ev);
-    QImage createAlphaMask( const QImage& srcImage, QRgb rgb );
+    QImage createColorAlphaMask( const QImage& srcImage, QRgb rgb );
 signals:
 
 private slots:
+
+public slots:
+    void loadImageFromDialog();
 };
 
 #endif // CLICKABLEQLABEL_H

@@ -21,6 +21,7 @@ public:
 private:
     Ui::MainWindow *ui;
     ClickableQLabel *imageLabel;
+    QPushButton *loadImageButton;
 
 private slots:
     void open();
