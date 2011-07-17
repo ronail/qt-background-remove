@@ -3,11 +3,12 @@
 #include <QMessageBox>
 #include "QFileDialog"
 #include "QMessageBox"
+#include "iostream"
+using namespace std;
 
 static const int TOLERANCE = 20;
 
 ClickableQLabel::ClickableQLabel(QWidget *parent) : QLabel(parent){
-
     setMouseTracking(true);
 }
 
@@ -22,8 +23,8 @@ void ClickableQLabel::mousePressEvent(QMouseEvent *ev){
 //        QImage mask = image.createMaskFromColor(rgb, Qt::MaskOutColor);
         QImage mask = createColorAlphaMask(image, rgb);
         image.setAlphaChannel(mask);
-//        this->setPixmap(QPixmap::fromImage(image));
-        this->setPixmap(QPixmap::fromImage(mask));
+        this->setPixmap(QPixmap::fromImage(image));
+//        this->setPixmap(QPixmap::fromImage(mask));
     }else {
         this->loadImageFromDialog();
     }
@@ -37,6 +38,11 @@ QImage ClickableQLabel::createColorAlphaMask( const QImage& srcImage, QRgb rgb )
     int nWidth = srcImage.width();
     int nHeight = srcImage.height();
     int nDepth = srcImage.depth();
+
+    int matchRed = qRed(rgb);
+    int matchBlue = qBlue(rgb);
+    int matchGreen = qGreen(rgb);
+
 
     QImage alphaMask( nWidth, nHeight, QImage::Format_MonoLSB );
     alphaMask.setColor( 0, 0xffffffff );
@@ -52,15 +58,16 @@ QImage ClickableQLabel::createColorAlphaMask( const QImage& srcImage, QRgb rgb )
         {
             unsigned char* pMaskData = alphaMask.scanLine( y );
             unsigned int* pSrcData = (unsigned int*)srcImage.scanLine( y );
+            QRgb *srcRgb = (QRgb *)srcImage.scanLine(y);
 
             for ( int x = 0; x < nWidth; x ++ )
             {
-//                pSrcData ++;
-                if ( *pSrcData++ >> 24 )
+                if ( abs(qRed(*srcRgb) - matchRed) <= TOLERANCE && abs(qGreen(*srcRgb) - matchGreen) < TOLERANCE && abs(qBlue(*srcRgb) - matchBlue) < TOLERANCE)
                 {
-                    pMaskData[x/8] |= 1 << (x % 8);   // fill 1111 1111 to every char (8 bit)
-//                    pMaskData[x/8] = 15;
+                    // fill 1 to the corresponding char
+                    pMaskData[x/8] |= 1 << (x % 8);
                 }
+                srcRgb++;
             }
         }
         break;
