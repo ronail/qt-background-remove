@@ -45,13 +45,11 @@
       <string>TextLabel</string>
      </property>
     </widget>
-    <zorder>imageLabel</zorder>
-    <zorder>loadImageButton</zorder>
    </widget>
    <widget class="QPushButton" name="loadImageButton">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>80</x>
       <y>260</y>
       <width>114</width>
       <height>32</height>
@@ -61,6 +59,19 @@
      <string>Load image</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="exportButton">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>260</y>
+      <width>114</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Export image</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -68,7 +79,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -87,7 +98,7 @@
   <customwidget>
    <class>ClickableQLabel</class>
    <extends>QLabel</extends>
-   <header>clickableqlabel.h</header>
+   <header location="global">clickableqlabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

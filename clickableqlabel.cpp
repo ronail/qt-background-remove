@@ -1,12 +1,11 @@
 #include "clickableqlabel.h"
 #include <QMouseEvent>
-#include <QMessageBox>
 #include "QFileDialog"
-#include "QMessageBox"
 #include "iostream"
 using namespace std;
 
 static const int TOLERANCE = 20;
+
 
 ClickableQLabel::ClickableQLabel(QWidget *parent) : QLabel(parent){
     setMouseTracking(true);
@@ -14,23 +13,19 @@ ClickableQLabel::ClickableQLabel(QWidget *parent) : QLabel(parent){
 
 void ClickableQLabel::mousePressEvent(QMouseEvent *ev){
     ev->accept();
-    ev->pos();
     if (this->pixmap()) {
-        QImage image = this->pixmap()->toImage();
-        QRgb rgb = image.pixel(ev->pos());
-//        QColor color(rgb);
-//        QMessageBox::information(this, "", tr("Rgb components: ") + QString::number(color.red()) + ", " + QString::number(color.green()) + ", " + QString::number(color.blue()));
-//        QImage mask = image.createMaskFromColor(rgb, Qt::MaskOutColor);
-        QImage mask = createColorAlphaMask(image, rgb);
-        image.setAlphaChannel(mask);
-        this->setPixmap(QPixmap::fromImage(image));
-//        this->setPixmap(QPixmap::fromImage(mask));
-    }else {
-        this->loadImageFromDialog();
+        QImage scaledImage = this->pixmap()->toImage();
+        int x = ev->pos().x() * this->image.size().width() / scaledImage.size().width();
+        int y = ev->pos().y() * this->image.size().height() / scaledImage.size().height();
+        QPoint *pos = new QPoint(x,y);
+        QImage mask = createColorAlphaMask(this->image, pos);
+        this->image.setAlphaChannel(mask);
+        this->setImage(&(this->image));
+
     }
 }
 
-QImage ClickableQLabel::createColorAlphaMask( const QImage& srcImage, QRgb rgb )
+QImage ClickableQLabel::createColorAlphaMask( const QImage& srcImage, const QPoint *point )
 {
 //    int nWidth = m_PatchSetImage.width();
 //    int nHeight = m_PatchSetImage.height();
@@ -38,6 +33,8 @@ QImage ClickableQLabel::createColorAlphaMask( const QImage& srcImage, QRgb rgb )
     int nWidth = srcImage.width();
     int nHeight = srcImage.height();
     int nDepth = srcImage.depth();
+
+    QRgb rgb = srcImage.pixel(*point);
 
     int matchRed = qRed(rgb);
     int matchBlue = qBlue(rgb);
@@ -80,19 +77,22 @@ QImage ClickableQLabel::createColorAlphaMask( const QImage& srcImage, QRgb rgb )
     return alphaMask;
 }
 
-void ClickableQLabel::loadImageFromDialog()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Load image file"), QDir::currentPath());
-    if(!fileName.isEmpty()) {
-        QImage image(fileName);
-        if (image.isNull()) {
-            QMessageBox::information(this, tr("Image Viewer"), tr("Fail to load %1").arg(fileName));
-            return;
-        }
 
-        // load image into label
-        this->setPixmap(QPixmap::fromImage(image));
-        // resize image
-        this->resize(image.size());
-    }
+void ClickableQLabel::setImage(QImage *image)
+{
+    // store it for export use
+    this->image = *image;
+
+    // scale image to fit label
+    QImage scaledImage = image->scaled(QSize(this->size().width(), this->size().height()), Qt::KeepAspectRatio);
+    // load image into label
+    this->setPixmap(QPixmap::fromImage(scaledImage));
+    // resize image
+//        this->resize(image.size());
+}
+
+
+QImage *ClickableQLabel::getImage()
+{
+    return &(this->image);
 }

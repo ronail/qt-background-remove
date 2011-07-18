@@ -22,9 +22,14 @@ private:
     Ui::MainWindow *ui;
     ClickableQLabel *imageLabel;
     QPushButton *loadImageButton;
+    QPushButton *exportButton;
+    QString filename;
+    void setImage(QString filepath);
 
 private slots:
     void open();
+    void showExportFileDialog();
+    void showLoadImageDialog();
 };
 
 #endif // MAINWINDOW_H
