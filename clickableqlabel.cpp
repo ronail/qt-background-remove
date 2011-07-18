@@ -1,11 +1,9 @@
 #include "clickableqlabel.h"
 #include <QMouseEvent>
-#include "QFileDialog"
-#include "iostream"
+#include <QQueue>
 using namespace std;
 
-static const int TOLERANCE = 20;
-
+static const int TOLERANCE = 30;
 
 ClickableQLabel::ClickableQLabel(QWidget *parent) : QLabel(parent){
     setMouseTracking(true);
@@ -48,25 +46,67 @@ QImage ClickableQLabel::createColorAlphaMask( const QImage& srcImage, const QPoi
     // initialize everything to 0 first
     memset( alphaMask.bits(), 0, alphaMask.numBytes() );
 
+    QQueue<QPoint> pointQueue;
+    QSet<long> checkedSet;
+    QPoint p;
+    QPoint tp;
+    QRgb tRgb;
     switch ( nDepth )
     {
     case 32:
-        for ( int y = 0; y < nHeight; ++y )
-        {
-            unsigned char* pMaskData = alphaMask.scanLine( y );
-            unsigned int* pSrcData = (unsigned int*)srcImage.scanLine( y );
-            QRgb *srcRgb = (QRgb *)srcImage.scanLine(y);
+        // A* search of pixel to be remove
+        pointQueue.enqueue(QPoint(point->x(), point->y()));
 
-            for ( int x = 0; x < nWidth; x ++ )
-            {
-                if ( abs(qRed(*srcRgb) - matchRed) <= TOLERANCE && abs(qGreen(*srcRgb) - matchGreen) < TOLERANCE && abs(qBlue(*srcRgb) - matchBlue) < TOLERANCE)
-                {
-                    // fill 1 to the corresponding char
-                    pMaskData[x/8] |= 1 << (x % 8);
+        // handle neighbouring pixel in a sequence of top, right, bottom, left
+        while (!pointQueue.isEmpty()) {
+            p = pointQueue.dequeue();
+            long setValue = p.x() + p.y() * nWidth;
+            tRgb = srcImage.pixel(p);
+            if ( abs(qRed(tRgb) - matchRed) <= TOLERANCE && abs(qGreen(tRgb) - matchGreen) < TOLERANCE && abs(qBlue(tRgb) - matchBlue) < TOLERANCE) {
+                alphaMask.setPixel(p, 1);
+                if (p.y() < nHeight) {
+                    tp = QPoint(p.x(), p.y() + 1);
+                    if (!checkedSet.contains(setValue))
+                        pointQueue.enqueue(tp);
                 }
-                srcRgb++;
+                if (p.x() < nWidth) {
+                    tp = QPoint(p.x() + 1, p.y());
+                    if (!checkedSet.contains(setValue))
+                        pointQueue.enqueue(tp);
+                }
+                if (p.y() != 0) {
+                    tp = QPoint(p.x(), p.y() - 1);
+                    if (!checkedSet.contains(setValue))
+                        pointQueue.enqueue(tp);
+                }
+                if (p.x() != 0) {
+                    tp = QPoint(p.x() - 1, p.y());
+                    if (!checkedSet.contains(setValue))
+                        pointQueue.enqueue(tp);
+                }
             }
+            checkedSet.insert(setValue);
         }
+//        foreach (*p, checkedSet) {
+//            delete p;
+//        }
+
+//        for ( int y = 0; y < nHeight; ++y )
+//        {
+//            unsigned char* pMaskData = alphaMask.scanLine( y );
+//            unsigned int* pSrcData = (unsigned int*)srcImage.scanLine( y );
+//            QRgb *srcRgb = (QRgb *)srcImage.scanLine(y);
+
+//            for ( int x = 0; x < nWidth; x ++ )
+//            {
+//                if ( abs(qRed(*srcRgb) - matchRed) <= TOLERANCE && abs(qGreen(*srcRgb) - matchGreen) < TOLERANCE && abs(qBlue(*srcRgb) - matchBlue) < TOLERANCE)
+//                {
+//                    // fill 1 to the corresponding char
+//                    pMaskData[x/8] |= 1 << (x % 8);
+//                }
+//                srcRgb++;
+//            }
+//        }
         break;
     default:
         // Set mask to all 1's if not 32 bit depth
@@ -96,3 +136,4 @@ QImage *ClickableQLabel::getImage()
 {
     return &(this->image);
 }
+
