@@ -16,6 +16,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+    ClickableQLabel *imageRightLabel;
     ~MainWindow();
 
 private:
@@ -23,13 +24,17 @@ private:
     ClickableQLabel *imageLabel;
     QPushButton *loadImageButton;
     QPushButton *exportButton;
-    QString filename;
+    QString filepath;
+    QImage image;
     void setImage(QString filepath);
-
-private slots:
-    void open();
+public slots:
     void showExportFileDialog();
     void showLoadImageDialog();
+private slots:
+    void open();
+    void on_tolerancySlider_valueChanged(int value);
+    void on_resetButton_clicked();
+    void on_previewCheckBox_toggled(bool checked);
 };
 
 #endif // MAINWINDOW_H

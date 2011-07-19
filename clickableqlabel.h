@@ -3,22 +3,31 @@
 
 #include <QLabel>
 
+
+
 class ClickableQLabel : public QLabel
 {
     Q_OBJECT
 public:
     explicit ClickableQLabel(QWidget *parent = 0);
     QImage* getImage();
-    void setImage(QImage *image);
+    static int TOLERANCE;
+    void setImage(QImage image);
+    void reset();
 protected:
-    QImage createColorAlphaMask( const QImage& srcImage, const QPoint *point );
+    QPixmap originPixmap;
     QImage image;
+    QPoint lastPoint;
+    QRgb lastRbg;
     void mousePressEvent(QMouseEvent *ev);
 signals:
 
 private slots:
 
 public slots:
+    void removeBackground();
+    void didChangeTolerant();
 };
 
+QImage alphaMaskWithPoint( const QImage& srcImage, const QPoint *point );
 #endif // CLICKABLEQLABEL_H

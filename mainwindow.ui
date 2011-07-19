@@ -6,18 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>351</height>
+    <width>451</width>
+    <height>352</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>BackgroundRemover</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>0</y>
       <width>401</width>
       <height>251</height>
@@ -42,43 +42,118 @@
       </rect>
      </property>
      <property name="text">
-      <string>TextLabel</string>
+      <string/>
      </property>
     </widget>
    </widget>
    <widget class="QPushButton" name="loadImageButton">
     <property name="geometry">
      <rect>
-      <x>80</x>
+      <x>10</x>
       <y>260</y>
-      <width>114</width>
+      <width>91</width>
       <height>32</height>
      </rect>
     </property>
     <property name="text">
-     <string>Load image</string>
+     <string>Load</string>
     </property>
    </widget>
    <widget class="QPushButton" name="exportButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>110</x>
       <y>260</y>
-      <width>114</width>
+      <width>91</width>
       <height>32</height>
      </rect>
     </property>
     <property name="text">
-     <string>Export image</string>
+     <string>Export</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="resetButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>260</y>
+      <width>75</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reset</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="previewCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>260</y>
+      <width>70</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Preview</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>10</y>
+      <width>21</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QSlider" name="tolerancySlider">
+       <property name="maximum">
+        <number>255</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::NoTicks</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="toleranceLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <zorder>frame</zorder>
+   <zorder>loadImageButton</zorder>
+   <zorder>exportButton</zorder>
+   <zorder>tolerancySlider</zorder>
+   <zorder>resetButton</zorder>
+   <zorder>toleranceLabel</zorder>
+   <zorder>previewCheckBox</zorder>
+   <zorder>tolerancySlider</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>451</width>
      <height>21</height>
     </rect>
    </property>

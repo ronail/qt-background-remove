@@ -10,11 +10,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-//    imageLabel = ui->imageLabel;
-//    loadImageButton = ui->loadImageButton;
-//    exportButton = ui->exportButton;
+    ui->tolerancySlider->setTracking(false);
+    ui->toleranceLabel->setText(QString::number(ClickableQLabel::TOLERANCE));
+    ui->tolerancySlider->setValue(ClickableQLabel::TOLERANCE);
     connect(ui->loadImageButton, SIGNAL(clicked(bool)), this, SLOT(showLoadImageDialog()));
     connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(showExportFileDialog()));
+//    connect(ui->resetButton, SIGNAL(clicked()), ui->imageLabel, SLOT(resetImage()));
 }
 
 MainWindow::~MainWindow()
@@ -32,14 +33,16 @@ void MainWindow::showLoadImageDialog()
     QString filepath = QFileDialog::getOpenFileName(this, tr("Load image file"), QDir::currentPath());
     if(!filepath.isEmpty()) {
         this->setImage(filepath);
+        this->ui->exportButton->setEnabled(true);
+        this->ui->resetButton->setEnabled(true);
     }
 }
 
 void MainWindow::showExportFileDialog()
 {
-    QString filepath = QFileDialog::getSaveFileName(this, tr("Export file to..."), QDir::currentPath(), "PNG");
-    if (!filepath.isEmpty()) {
-        ui->imageLabel->getImage()->save(filepath);
+    QString saveFilepath = QFileDialog::getSaveFileName(this, tr("Export file to..."), QDir::currentPath(), "PNG");
+    if (!saveFilepath.isEmpty()) {
+        ui->imageLabel->getImage()->save(saveFilepath);
     }
 }
 
@@ -51,8 +54,10 @@ void MainWindow::setImage(QString filepath)
         QMessageBox::information(this, tr("Image Viewer"), tr("Fail to load %1").arg(filepath));
         return;
     }
-    ui->imageLabel->setImage(&tempImage);
-    this->filename = filenameFromPath(filepath);
+    ui->imageLabel->setImage(tempImage);
+//    this->filepath = filenameFromPath(filepath);
+    this->filepath = filepath;
+    this->image = tempImage.copy();
 }
 
 static QString filenameFromPath(QString filepath){
@@ -60,3 +65,24 @@ static QString filenameFromPath(QString filepath){
      return filepath.right(filepath.length() - index - 1);
 }
 
+
+void MainWindow::on_tolerancySlider_valueChanged(int value)
+{
+    ClickableQLabel::TOLERANCE = value;
+    ui->toleranceLabel->setText(QString::number(value));
+    if (ui->imageLabel->pixmap()) {
+        ui->imageLabel->setImage(this->image);
+        ui->imageLabel->removeBackground();
+    }
+}
+
+void MainWindow::on_resetButton_clicked()
+{
+    ui->imageLabel->reset();
+    ui->imageLabel->setImage(this->image);
+}
+
+void MainWindow::on_previewCheckBox_toggled(bool checked)
+{
+    ui->tolerancySlider->setTracking(checked);
+}
