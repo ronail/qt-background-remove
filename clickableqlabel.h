@@ -12,12 +12,12 @@ public:
     explicit ClickableQLabel(QWidget *parent = 0);
     QImage* getImage();
     static int TOLERANCE;
-    void setImage(QImage image);
+    void setImage(QImage* image);
     void reset();
 protected:
-    QPixmap originPixmap;
-    QImage image;
-    QPoint lastPoint;
+    QPixmap *originPixmap;
+    QImage *image;
+    QPoint *lastPoint;
     QRgb lastRbg;
     void mousePressEvent(QMouseEvent *ev);
 signals:

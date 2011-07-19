@@ -49,15 +49,15 @@ void MainWindow::showExportFileDialog()
 
 void MainWindow::setImage(QString filepath)
 {
-    QImage tempImage(filepath);
-    if (tempImage.isNull()) {
+    QImage *tempImage = new QImage(filepath);
+    if (tempImage->isNull()) {
         QMessageBox::information(this, tr("Image Viewer"), tr("Fail to load %1").arg(filepath));
         return;
     }
     ui->imageLabel->setImage(tempImage);
 //    this->filepath = filenameFromPath(filepath);
     this->filepath = filepath;
-    this->image = tempImage.copy();
+    this->image = *tempImage;
 }
 
 static QString filenameFromPath(QString filepath){
@@ -71,7 +71,7 @@ void MainWindow::on_tolerancySlider_valueChanged(int value)
     ClickableQLabel::TOLERANCE = value;
     ui->toleranceLabel->setText(QString::number(value));
     if (ui->imageLabel->pixmap()) {
-        ui->imageLabel->setImage(this->image);
+        ui->imageLabel->setImage(&(this->image));
         ui->imageLabel->removeBackground();
     }
 }
@@ -79,7 +79,7 @@ void MainWindow::on_tolerancySlider_valueChanged(int value)
 void MainWindow::on_resetButton_clicked()
 {
     ui->imageLabel->reset();
-    ui->imageLabel->setImage(this->image);
+//    ui->imageLabel->setImage(this->image);
 }
 
 void MainWindow::on_previewCheckBox_toggled(bool checked)

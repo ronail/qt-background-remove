@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/background">
         <file>checker.png</file>
+        <file>sample.jpg</file>
     </qresource>
 </RCC>
