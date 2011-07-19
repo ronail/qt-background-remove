@@ -10,6 +10,10 @@ int ClickableQLabel::TOLERANCE = 30;
 
 ClickableQLabel::ClickableQLabel(QWidget *parent) : QLabel(parent){
     setMouseTracking(true);
+
+    // init variables
+    this->lastPoint = 0;
+    this->lastRbg = 0;
 }
 
 void ClickableQLabel::mousePressEvent(QMouseEvent *ev){
@@ -38,30 +42,37 @@ static const void writeAlphaMask(const QImage* srcImage, QPoint *point, QImage *
     // handle neighbouring pixel in a sequence of top, right, bottom, left
     while (!pointQueue->isEmpty()) {
         long index = pointQueue->dequeue();
-        qDebug("(%d, %d)", x, y);
         x = index % nWidth;
         y = index / nWidth;
+        qDebug("(%d, %d), Queue length: %d", x, y, pointQueue->length());
         tRgb = srcImage->pixel(x, y);
         if ( abs(qRed(tRgb) - matchRed) <= ClickableQLabel::TOLERANCE && abs(qGreen(tRgb) - matchGreen) < ClickableQLabel::TOLERANCE && abs(qBlue(tRgb) - matchBlue) < ClickableQLabel::TOLERANCE) {
             alphaMask->setPixel(x, y, 1);
+            long nextIndex = 0;
             if (y < nHeight - 1) {
-                if (!checkedSet->contains(index))
-                    pointQueue->enqueue(index);
+                nextIndex = index + nWidth;
+                if (!checkedSet->contains(nextIndex))
+                    pointQueue->enqueue(nextIndex);
             }
             if (x < nWidth - 1) {
-                if (!checkedSet->contains(index))
-                    pointQueue->enqueue(index);
+                nextIndex = index + 1;
+                if (!checkedSet->contains(nextIndex))
+                    pointQueue->enqueue(nextIndex);
             }
             if (y != 0) {
-                if (!checkedSet->contains(index))
-                    pointQueue->enqueue(index);
+                nextIndex = index - nWidth;
+                if (!checkedSet->contains(nextIndex))
+                    pointQueue->enqueue(nextIndex);
             }
             if (x != 0) {
-                if (!checkedSet->contains(index))
-                    pointQueue->enqueue(index);
+                nextIndex = index - 1;
+                if (!checkedSet->contains(nextIndex))
+                    pointQueue->enqueue(nextIndex);
             }
         }
         checkedSet->insert(index);
+//        foreach(long i, *checkedSet)
+//            qDebug("%d", i);
     }
     delete pointQueue;
     delete checkedSet;

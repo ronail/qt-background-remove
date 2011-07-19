@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>451</width>
-    <height>352</height>
+    <width>459</width>
+    <height>353</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,57 +104,55 @@
      <string>Preview</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QLabel" name="toleranceLabel">
+    <property name="geometry">
+     <rect>
+      <x>418</x>
+      <y>234</y>
+      <width>31</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QSlider" name="tolerancySlider">
     <property name="geometry">
      <rect>
       <x>420</x>
-      <y>10</y>
-      <width>21</width>
-      <height>241</height>
+      <y>11</y>
+      <width>31</width>
+      <height>211</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QSlider" name="tolerancySlider">
-       <property name="maximum">
-        <number>255</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="tickPosition">
-        <enum>QSlider::NoTicks</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="toleranceLabel">
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <property name="maximum">
+     <number>255</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::NoTicks</enum>
+    </property>
    </widget>
+   <zorder>layoutWidget</zorder>
    <zorder>frame</zorder>
    <zorder>loadImageButton</zorder>
    <zorder>exportButton</zorder>
-   <zorder>tolerancySlider</zorder>
    <zorder>resetButton</zorder>
-   <zorder>toleranceLabel</zorder>
    <zorder>previewCheckBox</zorder>
-   <zorder>tolerancySlider</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>451</width>
-     <height>21</height>
+     <width>459</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>

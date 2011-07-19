@@ -71,7 +71,9 @@ void MainWindow::on_tolerancySlider_valueChanged(int value)
     ClickableQLabel::TOLERANCE = value;
     ui->toleranceLabel->setText(QString::number(value));
     if (ui->imageLabel->pixmap()) {
+        // reload the original image
         ui->imageLabel->setImage(&(this->image));
+        // remove background using new tolerance value
         ui->imageLabel->removeBackground();
     }
 }
