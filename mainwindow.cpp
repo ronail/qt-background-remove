@@ -72,7 +72,7 @@ void MainWindow::on_tolerancySlider_valueChanged(int value)
     ui->toleranceLabel->setText(QString::number(value));
     if (ui->imageLabel->pixmap()) {
         // reload the original image
-        ui->imageLabel->setImage(&(this->image));
+        ui->imageLabel->setImage(new QImage(this->image));
         // remove background using new tolerance value
         ui->imageLabel->removeBackground();
     }
@@ -81,7 +81,7 @@ void MainWindow::on_tolerancySlider_valueChanged(int value)
 void MainWindow::on_resetButton_clicked()
 {
     ui->imageLabel->reset();
-//    ui->imageLabel->setImage(this->image);
+    ui->imageLabel->setImage(new QImage(this->image));
 }
 
 void MainWindow::on_previewCheckBox_toggled(bool checked)

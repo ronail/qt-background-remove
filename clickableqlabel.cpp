@@ -1,12 +1,12 @@
 #include "clickableqlabel.h"
 #include <QMouseEvent>
-#include <QQueue>
 #include <mainwindow.h>
 #include <QTime>
 
 using namespace std;
 
 int ClickableQLabel::TOLERANCE = 30;
+static const int enqueueUncheckedNeighbours(QQueue<QPoint *> *queue, QSet<long> *set, int x, int y, int width, int height, long index);
 
 ClickableQLabel::ClickableQLabel(QWidget *parent) : QLabel(parent){
     setMouseTracking(true);
@@ -24,17 +24,55 @@ void ClickableQLabel::mousePressEvent(QMouseEvent *ev){
     }
 }
 
+static const int enqueueUncheckedNeighbours(QQueue<long> *queue, QSet<long> *set, int x, int y, int width, int height)
+{
+    long index = y * width + x;
+    long nextIndex = 0;
+    if (y < height - 1) {
+        nextIndex = index + width;
+        if (!set->contains(nextIndex)){
+            queue->enqueue(nextIndex);
+            set->insert(nextIndex);
+        }
+    }
+    if (x < width - 1) {
+        nextIndex = index + 1;
+        if (!set->contains(nextIndex)){
+            queue->enqueue(nextIndex);
+            set->insert(nextIndex);
+        }
+    }
+    if (y != 0) {
+        nextIndex = index - width;
+        if (!set->contains(nextIndex)){
+            queue->enqueue(nextIndex);
+            set->insert(nextIndex);
+        }
+    }
+    if (x != 0) {
+        nextIndex = index - 1;
+        if (!set->contains(nextIndex)){
+            queue->enqueue(nextIndex);
+            set->insert(nextIndex);
+        }
+    }
+}
+
+static const bool isSimilarPixel(QRgb targetRgb, QRgb refRgb)
+{
+    int matchRed = qRed(refRgb);
+    int matchBlue = qBlue(refRgb);
+    int matchGreen = qGreen(refRgb);
+    return abs(qRed(targetRgb) - matchRed) <= ClickableQLabel::TOLERANCE && abs(qGreen(targetRgb) - matchGreen) < ClickableQLabel::TOLERANCE && abs(qBlue(targetRgb) - matchBlue) < ClickableQLabel::TOLERANCE;
+}
+
 static const void writeAlphaMask(const QImage* srcImage, QPoint *point, QImage *alphaMask)
 {
     int nWidth = srcImage->width();
     int nHeight = srcImage->height();
-    QRgb rgb = srcImage->pixel(*point);
-    int matchRed = qRed(rgb);
-    int matchBlue = qBlue(rgb);
-    int matchGreen = qGreen(rgb);
+    const QRgb rgb = srcImage->pixel(*point);
     static QQueue<long> *pointQueue = new QQueue<long>();
-    QSet<long> *checkedSet = new QSet<long>();
-    QRgb tRgb;
+    static QSet<long> *queuedSet = new QSet<long>();
     int x, y;
 
     pointQueue->enqueue(point->x() + point->y() * nWidth);
@@ -44,38 +82,18 @@ static const void writeAlphaMask(const QImage* srcImage, QPoint *point, QImage *
         long index = pointQueue->dequeue();
         x = index % nWidth;
         y = index / nWidth;
-        qDebug("(%d, %d), Queue length: %d", x, y, pointQueue->length());
-        tRgb = srcImage->pixel(x, y);
-        if ( abs(qRed(tRgb) - matchRed) <= ClickableQLabel::TOLERANCE && abs(qGreen(tRgb) - matchGreen) < ClickableQLabel::TOLERANCE && abs(qBlue(tRgb) - matchBlue) < ClickableQLabel::TOLERANCE) {
+//        qDebug("(%d, %d), Queue length: %d", x, y, pointQueue->length());
+        if (isSimilarPixel(srcImage->pixel(x, y), rgb) ) {
             alphaMask->setPixel(x, y, 1);
-            long nextIndex = 0;
-            if (y < nHeight - 1) {
-                nextIndex = index + nWidth;
-                if (!checkedSet->contains(nextIndex))
-                    pointQueue->enqueue(nextIndex);
-            }
-            if (x < nWidth - 1) {
-                nextIndex = index + 1;
-                if (!checkedSet->contains(nextIndex))
-                    pointQueue->enqueue(nextIndex);
-            }
-            if (y != 0) {
-                nextIndex = index - nWidth;
-                if (!checkedSet->contains(nextIndex))
-                    pointQueue->enqueue(nextIndex);
-            }
-            if (x != 0) {
-                nextIndex = index - 1;
-                if (!checkedSet->contains(nextIndex))
-                    pointQueue->enqueue(nextIndex);
-            }
+            enqueueUncheckedNeighbours(pointQueue, queuedSet, x, y, nWidth, nHeight);
         }
-        checkedSet->insert(index);
 //        foreach(long i, *checkedSet)
 //            qDebug("%d", i);
     }
-    delete pointQueue;
-    delete checkedSet;
+    pointQueue->clear();
+    queuedSet->clear();
+//    delete pointQueue;
+//    delete queuedSet;
 }
 
 QImage *alphaMaskWithPoint( const QImage* srcImage, QPoint *point )
@@ -159,5 +177,5 @@ void ClickableQLabel::reset()
     delete this->image;
     delete this->lastPoint;
     delete this->originPixmap;
-    this->clear();
+//    this->clear();
 }
