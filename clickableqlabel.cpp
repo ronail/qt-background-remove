@@ -141,6 +141,8 @@ void ClickableQLabel::setImage(QImage* newImage)
     // scale image to fit label
     QImage scaledImage = newImage->scaled(QSize(this->size().width(), this->size().height()), Qt::KeepAspectRatio);
     // load image into label
+    if (!this->pixmap())
+        delete this->pixmap();
     this->setPixmap(QPixmap::fromImage(scaledImage));
     // resize image
 //        this->resize(image.size());
