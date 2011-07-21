@@ -71,27 +71,27 @@ static const void writeAlphaMask(const QImage* srcImage, QPoint *point, QImage *
     int nWidth = srcImage->width();
     int nHeight = srcImage->height();
     const QRgb rgb = srcImage->pixel(*point);
-    static QQueue<long> *pointQueue = new QQueue<long>();
-    static QSet<long> *queuedSet = new QSet<long>();
+    static QQueue<long> pointQueue;
+    static QSet<long> queuedSet;
     int x, y;
 
-    pointQueue->enqueue(point->x() + point->y() * nWidth);
+    pointQueue.enqueue(point->x() + point->y() * nWidth);
 
     // handle neighbouring pixel in a sequence of top, right, bottom, left
-    while (!pointQueue->isEmpty()) {
-        long index = pointQueue->dequeue();
+    while (!pointQueue.isEmpty()) {
+        long index = pointQueue.dequeue();
         x = index % nWidth;
         y = index / nWidth;
 //        qDebug("(%d, %d), Queue length: %d", x, y, pointQueue->length());
         if (isSimilarPixel(srcImage->pixel(x, y), rgb) ) {
             alphaMask->setPixel(x, y, 1);
-            enqueueUncheckedNeighbours(pointQueue, queuedSet, x, y, nWidth, nHeight);
+            enqueueUncheckedNeighbours(&pointQueue, &queuedSet, x, y, nWidth, nHeight);
         }
 //        foreach(long i, *checkedSet)
 //            qDebug("%d", i);
     }
-    pointQueue->clear();
-    queuedSet->clear();
+    pointQueue.clear();
+    queuedSet.clear();
 //    delete pointQueue;
 //    delete queuedSet;
 }
