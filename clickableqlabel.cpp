@@ -2,11 +2,14 @@
 #include <QMouseEvent>
 #include <mainwindow.h>
 #include <QTime>
+#include <QDebug>
 
 using namespace std;
 
 int ClickableQLabel::TOLERANCE = 30;
 static const int enqueueUncheckedNeighbours(QQueue<QPoint *> *queue, QSet<long> *set, int x, int y, int width, int height, long index);
+static QQueue<long> pointQueue;
+static QSet<long> queuedSet;
 
 ClickableQLabel::ClickableQLabel(QWidget *parent) : QLabel(parent){
     setMouseTracking(true);
@@ -24,7 +27,7 @@ void ClickableQLabel::mousePressEvent(QMouseEvent *ev){
     }
 }
 
-static const int enqueueUncheckedNeighbours(QQueue<long> *queue, QSet<long> *set, int x, int y, int width, int height)
+static const void enqueueUncheckedNeighbours(QQueue<long> *queue, QSet<long> *set, int x, int y, int width, int height)
 {
     long index = y * width + x;
     long nextIndex = 0;
@@ -66,13 +69,11 @@ static const bool isSimilarPixel(QRgb targetRgb, QRgb refRgb)
     return abs(qRed(targetRgb) - matchRed) <= ClickableQLabel::TOLERANCE && abs(qGreen(targetRgb) - matchGreen) < ClickableQLabel::TOLERANCE && abs(qBlue(targetRgb) - matchBlue) < ClickableQLabel::TOLERANCE;
 }
 
-static const void writeAlphaMask(const QImage* srcImage, QPoint *point, QImage *alphaMask)
+static const void writeAlphaChannel(QImage *srcImage, const QPoint *point)
 {
     int nWidth = srcImage->width();
     int nHeight = srcImage->height();
     const QRgb rgb = srcImage->pixel(*point);
-    static QQueue<long> pointQueue;
-    static QSet<long> queuedSet;
     int x, y;
 
     pointQueue.enqueue(point->x() + point->y() * nWidth);
@@ -83,66 +84,39 @@ static const void writeAlphaMask(const QImage* srcImage, QPoint *point, QImage *
         x = index % nWidth;
         y = index / nWidth;
 //        qDebug("(%d, %d), Queue length: %d", x, y, pointQueue->length());
-        if (isSimilarPixel(srcImage->pixel(x, y), rgb) ) {
-            alphaMask->setPixel(x, y, 1);
+        QRgb srcRgb = srcImage->pixel(x, y);
+        if (isSimilarPixel(srcRgb, rgb) ) {
+            srcImage->setPixel(x, y, 0x00ffffff & srcRgb);
             enqueueUncheckedNeighbours(&pointQueue, &queuedSet, x, y, nWidth, nHeight);
         }
-//        foreach(long i, *checkedSet)
-//            qDebug("%d", i);
     }
     pointQueue.clear();
     queuedSet.clear();
-//    delete pointQueue;
-//    delete queuedSet;
-}
-
-QImage *alphaMaskWithPoint( const QImage* srcImage, QPoint *point )
-{
-//    int nWidth = m_PatchSetImage.width();
-//    int nHeight = m_PatchSetImage.height();
-//    int nDepth = m_PatchSetImage.depth();
-    int nWidth = srcImage->width();
-    int nHeight = srcImage->height();
-    int nDepth = srcImage->depth();
-
-    QImage *alphaMask = new QImage( nWidth, nHeight, QImage::Format_MonoLSB );
-    alphaMask->setColor( 0, 0xFFFFFFFF );
-    alphaMask->setColor( 1, 0 );
-    alphaMask->fill(0);
-    // initialize everything to 0 first
-//    memset( alphaMask.bits(), 0, alphaMask.numBytes() );
-
-    QTime start;
-    switch ( nDepth )
-    {
-    case 32:
-        start.start();
-        writeAlphaMask(srcImage, point, alphaMask);
-        qDebug("Time elapsed: %d ms", start.elapsed());
-        break;
-    default:
-        // Set mask to all 1's if not 32 bit depth
-        memset( alphaMask->bits(), 0xFF, alphaMask->numBytes() );
-        break;
-    }
-
-    return alphaMask;
 }
 
 
-void ClickableQLabel::setImage(QImage* newImage)
+void ClickableQLabel::setImage(QImage const newImage)
 {
     // store it for export use
-    this->image = newImage;
+    this->image = QImage(newImage);
+
+    // add alpha channel if not exist
+    if(!this->image.hasAlphaChannel())
+    {
+//        memset( alphaMask->bits(), 0xFF, alphaMask->numBytes() );
+        QImage alphaMask(this->image.size(), QImage::Format_MonoLSB);
+        alphaMask.fill(0xFFFFFFFF);
+        this->image.setAlphaChannel(alphaMask);
+    }
 
     // store a original copy
-    this->originPixmap = new QPixmap(QPixmap::fromImage(*newImage));
+    this->originPixmap = &QPixmap::fromImage(this->image);
 
     // scale image to fit label
-    QImage scaledImage = newImage->scaled(QSize(this->size().width(), this->size().height()), Qt::KeepAspectRatio);
+    QImage scaledImage = this->image.scaled(QSize(this->size().width(), this->size().height()), Qt::KeepAspectRatio);
     // load image into label
-    if (!this->pixmap())
-        delete this->pixmap();
+//    if (this->pixmap())
+//        delete this->pixmap();
     this->setPixmap(QPixmap::fromImage(scaledImage));
     // resize image
 //        this->resize(image.size());
@@ -150,7 +124,7 @@ void ClickableQLabel::setImage(QImage* newImage)
 
 QImage *ClickableQLabel::getImage()
 {
-    return this->image;
+    return &this->image;
 }
 
 void ClickableQLabel::removeBackground()
@@ -159,11 +133,16 @@ void ClickableQLabel::removeBackground()
         return;
 
     QImage scaledImage = this->pixmap()->toImage();
-    int x = this->lastPoint->x() * this->image->size().width() / scaledImage.size().width();
-    int y = this->lastPoint->y() * this->image->size().height() / scaledImage.size().height();
+    int x = this->lastPoint->x() * this->image.size().width() / scaledImage.size().width();
+    int y = this->lastPoint->y() * this->image.size().height() / scaledImage.size().height();
 
-    QImage *mask = alphaMaskWithPoint(this->image, new QPoint(x,y));
-    this->image->setAlphaChannel(*mask);
+//    QImage *mask = alphaMaskWithPoint(this->image, new QPoint(x,y));
+//    this->image->setAlphaChannel(*mask);
+    QPoint point(x, y);
+    QTime start;
+    start.start();
+    writeAlphaChannel(&this->image, &point);
+    qDebug("Time elapsed: %d ms", start.elapsed());
     this->setImage(this->image);
 }
 
@@ -176,8 +155,8 @@ void ClickableQLabel::reset()
 {
 //    this->lastPoint->setX(-1);
 //    this->lastPoint->setY(-1);
-    delete this->image;
-    delete this->lastPoint;
-    delete this->originPixmap;
+//    delete this->image;
+    this->lastPoint = 0;
+    this->originPixmap = 0;
 //    this->clear();
 }

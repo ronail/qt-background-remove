@@ -13,12 +13,12 @@ public:
     explicit ClickableQLabel(QWidget *parent = 0);
     QImage* getImage();
     static int TOLERANCE;
-    void setImage(QImage* image);
+    void setImage(QImage const image);
     void reset();
     static const void writeAlphaMask(const QImage* srcImage, QPoint *point, QImage *alphaMask);
 protected:
     QPixmap *originPixmap;
-    QImage *image;
+    QImage image;
     QPoint *lastPoint;
     QRgb lastRbg;
     void mousePressEvent(QMouseEvent *ev);
