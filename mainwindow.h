@@ -35,6 +35,7 @@ private slots:
     void on_tolerancySlider_valueChanged(int value);
     void on_resetButton_clicked();
     void on_previewCheckBox_toggled(bool checked);
+    void on_tolerancySlider_sliderReleased();
 };
 
 #endif // MAINWINDOW_H

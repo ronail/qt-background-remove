@@ -10,12 +10,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->tolerancySlider->setTracking(false);
+    ui->tolerancySlider->setTracking(true);
     ui->toleranceLabel->setText(QString::number(ClickableQLabel::TOLERANCE));
     ui->tolerancySlider->setValue(ClickableQLabel::TOLERANCE);
     connect(ui->loadImageButton, SIGNAL(clicked(bool)), this, SLOT(showLoadImageDialog()));
     connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(showExportFileDialog()));
-//    connect(ui->resetButton, SIGNAL(clicked()), ui->imageLabel, SLOT(resetImage()));
 }
 
 MainWindow::~MainWindow()
@@ -70,12 +69,6 @@ void MainWindow::on_tolerancySlider_valueChanged(int value)
 {
     ClickableQLabel::TOLERANCE = value;
     ui->toleranceLabel->setText(QString::number(value));
-    if (ui->imageLabel->pixmap()) {
-        // reload the original image
-        ui->imageLabel->setImage(this->image);
-        // remove background using new tolerance value
-        ui->imageLabel->removeBackground();
-    }
 }
 
 void MainWindow::on_resetButton_clicked()
@@ -87,4 +80,17 @@ void MainWindow::on_resetButton_clicked()
 void MainWindow::on_previewCheckBox_toggled(bool checked)
 {
     ui->tolerancySlider->setTracking(checked);
+}
+
+void MainWindow::on_tolerancySlider_sliderReleased()
+{
+    int value = ui->tolerancySlider->value();
+    ClickableQLabel::TOLERANCE = value;
+    ui->toleranceLabel->setText(QString::number(value));
+    if (ui->imageLabel->pixmap()) {
+        // reload the original image
+        ui->imageLabel->setImage(this->image);
+        // remove background using new tolerance value
+        ui->imageLabel->removeBackground();
+    }
 }
