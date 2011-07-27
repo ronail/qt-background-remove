@@ -53,6 +53,9 @@ void MainWindow::setImage(QString filepath)
         QMessageBox::information(this, tr("Image Viewer"), tr("Fail to load %1").arg(filepath));
         return;
     }
+    QRect rect = ui->imageLabel->rect();
+    rect.setSize(tempImage.size());
+    ui->imageLabel->setFrameRect(rect);
     ui->imageLabel->setImage(tempImage);
 //    this->filepath = filenameFromPath(filepath);
     this->filepath = filepath;
