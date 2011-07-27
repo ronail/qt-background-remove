@@ -7,7 +7,7 @@
 #include <clickableqlabel.h>
 
 namespace Ui {
-    class MainWindow;
+    class ControlWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -20,7 +20,7 @@ public:
     ~MainWindow();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::ControlWindow *ui;
     ClickableQLabel *imageLabel;
     QPushButton *loadImageButton;
     QPushButton *exportButton;

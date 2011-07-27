@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "ui_controlwindow.h"
 #include "QFileDialog"
 #include <QMessageBox>
 
@@ -7,7 +7,7 @@ static QString filenameFromPath(QString filepath);
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::ControlWindow)
 {
     ui->setupUi(this);
     ui->tolerancySlider->setTracking(true);

@@ -10,6 +10,7 @@ INCLUDEPATH += .
 
 # Input
 HEADERS += clickableqlabel.h mainwindow.h
-FORMS += mainwindow.ui
+FORMS += \
+    controlwindow.ui
 SOURCES += clickableqlabel.cpp main.cpp mainwindow.cpp
 RESOURCES += images.qrc
